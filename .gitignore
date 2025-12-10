@@ -1,0 +1,18 @@
+# Ignore data folder entirely
+data/
+data/**
+
+# Ignore common large files
+*.pt
+*.json
+*.csv
+
+# Ignore generated feature/tensor folders
+**/tensor/*
+**/ema/*
+**/ema_tensor/*
+**/feature_csv/*
+**/final_data/*
+**/year_merge/*
+**/output/*
+
