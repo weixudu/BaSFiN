@@ -32,7 +32,7 @@ torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = True
 
 # 訓練參數
-device = torch.device('mps')
+device = torch.device('cpu')
 n_epochs = 200
 batch_size = 32
 team_size = 5

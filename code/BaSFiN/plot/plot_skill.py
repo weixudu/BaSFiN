@@ -37,7 +37,7 @@ def plot_stats(df, label):
 
 def main():
     files = {
-        "player_stats_BaS": "../output/BaS/player_stats_2025-08-25_16-02-32.csv",
+        "player_stats_BaS": "../output/BaS/player_stats_2025-07-13_21-00-10.csv",
         "player_stats_BT": "../output/player_stats_BT.csv"
     }
 

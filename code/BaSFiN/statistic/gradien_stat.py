@@ -3,7 +3,7 @@ import re
 import pandas as pd
 
 # === 路徑設定 ===
-LOG_PATH      = Path("logs/NAC+/BaSFiN_noInter_nofreeze_20250902_160415.log")
+LOG_PATH      = Path("logs/NAC+/BaSFiN_noInter_noFreeze_20250708_161702.log")
 CSV_WIDE_PATH = Path("../output/grads_all_no_freeze_trials.csv")   # 寬格式：每個梯度一欄
 
 # === 正規表示式 ===

@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 # === 可自行修改的參數 ===
 # LOG_PATH = "logs/final_logs/Best_parameter/cofim_random_10_20250623_190918.log"#best 
 
-LOG_PATH = "logs/final_logs/Best_parameter/cofim noema.log" #NOEMA
+LOG_PATH = "logs/final_logs/Best_parameter/cofim_noema_random_10_20250623_191434.log" #NOEMA
 TRIAL_IDS = [0, 1, 2,3,4,5,6,7,8,9]     
 
 # ────────────── 新版 Step 1 Regex ──────────────

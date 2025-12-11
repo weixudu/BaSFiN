@@ -72,12 +72,12 @@ def plot_auc_curves(data, phase, output_path=None):
     if output_path:
         plt.savefig(output_path)
         print(f"已儲存圖表至 {output_path}")
-    
-    plt.show()
+    else:
+        plt.show()
 
 
 def main():
-    log_path = 'logs/NAC/NAC_training_2025-12-10_17-05-05.log'  # ✅ 替換成你的實際檔案路徑
+    log_path = 'logs/NAC/NAC_training_2025-06-08_22-50-22.log'  # ✅ 替換成你的實際檔案路徑
     data = parse_log(log_path)
 
     print("Step 1 最終 Validation AUC:", data['step1']['final_val_auc'])

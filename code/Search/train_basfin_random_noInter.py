@@ -10,21 +10,7 @@ import os
 from datetime import datetime
 import json
 import gc
-# --- robust import so this script works with `-m` and direct execution
-import sys, pathlib
-ROOT = pathlib.Path(__file__).resolve().parents[1]  # .../code
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-try:
-    # 如果你是用 package 方式執行：python -m search.train_basfin_random_noInter
-    from search.BaSFiN_noInter import NAC
-except ImportError:
-    # 如果你是直接跑檔案：python search/train_basfin_random_noInter.py
-    from BaSFiN_noInter import NAC
-
-from data import Data
-
+from BaSFiN_noInter import NAC
 from data import Data
 
 # Set random seed
@@ -49,7 +35,7 @@ early_stop_patience = 5
 learning_rate = 0.00005   # Fixed learning rate
 freeze_modules = True
 num_trials = 5
-num_combinations = 57
+num_combinations = 121
 
 # Best hyperparameters
 anfm_player_dim = 49
@@ -349,7 +335,7 @@ def main():
     # for _ in range(num_combinations):
             # Randomly sample parameters
             # prob_dim = random.randint(8, 32)
-    for prob_dim in range(8, 64):
+    for prob_dim in range(8, 129):
         dropout = 0.2
 
         logger.info(f'\n=== Testing combination {combo_idx + 1}/{num_combinations}: '
