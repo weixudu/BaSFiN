@@ -25,8 +25,6 @@ except ImportError:
 
 from data import Data
 
-from data import Data
-
 # Set random seed
 SEED = 42
 random.seed(SEED)
@@ -47,9 +45,10 @@ prior_sigma = 1.0
 num_samples = 100
 early_stop_patience = 5
 learning_rate = 0.00005   # Fixed learning rate
-freeze_modules = True
+freeze_modules = False
 num_trials = 5
 num_combinations = 57
+
 
 # Best hyperparameters
 anfm_player_dim = 49
@@ -76,7 +75,7 @@ log_dir            = "logs/NAC+"
 log_dir = 'logs/NAC+'
 os.makedirs(log_dir, exist_ok=True)
 os.makedirs(save_dir, exist_ok=True)
-log_file = os.path.join(log_dir, f'BaSFiN_128_noInter_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+log_file = os.path.join(log_dir, f'BaSFiN_128_noInter_nofreeze{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',

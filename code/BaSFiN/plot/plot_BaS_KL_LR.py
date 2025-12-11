@@ -133,7 +133,7 @@ def plot_surface_lr_kl_auc(df: pd.DataFrame,
 # =========================
 if __name__ == "__main__":
     # === 修改這裡 ===
-    log_path = "logs/BBB/BaS_random_2025-07-30_04-28-30.log"
+    log_path = "logs/BBB/BaS_random_2025-09-17_15-32-34.log"
 
     df = parse_log(log_path)
     print(df.head())

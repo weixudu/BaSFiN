@@ -23,13 +23,13 @@ batch_size = 32
 learning_rate = 0.0001
 player_dims = [49]
 hidden_dims = [29]
-need_atts = [True]
+need_atts = [False]
 weight_decay = 0.005
 dropout_rates = [0.169]
 mlp_hidden_dims = [56]
 patience = 5
 team_size = 5
-FOCUS_PID  = 355
+FOCUS_PID  = 1
 COOP_MIN_CNT = 50          
 
 path = '../data/final_data/data_2013_2024.csv'

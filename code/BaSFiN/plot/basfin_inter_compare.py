@@ -2,12 +2,12 @@ import re
 import matplotlib.pyplot as plt
 
 # 兩個 MLP 訓練策略的 log 檔案路徑
-log_path_frozen = "logs/NAC+/BaSFiN_noInter_20250708_004154.log"
-log_path_e2e = "logs/NAC+/BaSFiN_noInter_noFreeze_20250708_004154.log"
+log_path_frozen = "logs/NAC+/BaSFiN_128_noInter_20250827_095530.log"
+log_path_e2e = "logs/NAC+/BaSFiN_128_noInter_nofreeze20250827_095601.log"
 
 # 兩條線性 baseline 的 AUC
-linear_auc_frozen = 0.6829
-linear_auc_e2e = 0.6723
+linear_auc_frozen = 0.6830
+linear_auc_e2e = 0.6788
 
 def parse_log_file(filepath):
     """

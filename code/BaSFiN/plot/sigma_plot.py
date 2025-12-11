@@ -14,7 +14,7 @@ import matplotlib.ticker as mticker
 from pathlib import Path
 
 # ─── configurable section ────────────────────────────────────────────────
-CSV_PATH   = "../output/BaS/sigma_tracking_stage2_best_trial_2025-07-30_13-58-46.csv"
+CSV_PATH   = "../output/BaS/sigma_tracking_stage2_best_trial_2025-08-25_16-02-32.csv"
 
 # GROUP1_IDS = [1227, 1088, 1222, 926, 1144]              
 GROUP1_IDS = [132, 438, 1, 355, 544] # 第一張圖

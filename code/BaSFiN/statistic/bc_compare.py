@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 # === 可自行修改的參數 ===
 # LOG_PATH = "logs/final_logs/Best_parameter/FiN_bc_best_needatt10_20250623_114349.log"#best 
 # LOG_PATH = "logs/final_logs/Best_parameter/FiN_bc_ReLU10_20250623_114410.log"#ReLU
-LOG_PATH = "logs/final_logs/Best_parameter/bc_concat10_20250623_114406.log" #concat
+LOG_PATH = "logs/final_logs/Best_parameter/bc ema.log" #concat
 TRIAL_IDS = [0, 1, 2,3,4,5,6,7,8,9]     
 
 # ────────────── 新版 Step 1 Regex ──────────────

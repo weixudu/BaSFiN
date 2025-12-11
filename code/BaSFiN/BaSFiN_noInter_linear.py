@@ -6,10 +6,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from search.BaS import NAC_BBB
-from .bc_fim import FIModel
-from .co_fim import NAC_ANFM
-
+from BaS import NAC_BBB
+from bc_fim2 import FIModel
+from co_fim2 import NAC_ANFM
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 class NAC(nn.Module):
     def __init__(
         self,
-        n_player: int,
+        n_hero: int,
         *,
         team_size: int = 5,
         anfm_hidden_dim: int = 32,
@@ -48,9 +47,9 @@ class NAC(nn.Module):
         self.kl_weight = kl_weight
 
         # ---------------- 子模組 ---------------- #
-        self.nac_bbb = NAC_BBB(n_player, team_size, device, prior_mu, prior_sigma)
+        self.nac_bbb = NAC_BBB(n_hero, team_size, device, prior_mu, prior_sigma)
         self.fimodel = FIModel(
-            n_player=n_player,
+            n_player=n_hero,
             player_dim=bc_player_dim,
             intermediate_dim=intermediate_dim,
             team_size=team_size,
@@ -62,7 +61,7 @@ class NAC(nn.Module):
             need_att=bc_need_att,
         )
         self.nac_anfm = NAC_ANFM(
-            n_player=n_player,
+            n_player=n_hero,
             player_dim=anfm_player_dim,
             team_size=team_size,
             hidden_dim=anfm_hidden_dim,
@@ -90,14 +89,10 @@ class NAC(nn.Module):
         # ---------------- 最終 MLP ---------------- #
         self.final_mlp = nn.Sequential(
             nn.BatchNorm1d(5),
-            nn.Linear(5, 2 * prob_dim),
-            nn.SiLU(),
-            nn.Linear(2 * prob_dim, prob_dim),
-            nn.SiLU(),
-            nn.Dropout(dropout),
-            nn.Linear(prob_dim, 1),
+            nn.Linear(5, 1),
             nn.Sigmoid(),
         )
+
 
     def _initialize_weights(self, module):
         if isinstance(module, (nn.Linear, nn.Embedding)):

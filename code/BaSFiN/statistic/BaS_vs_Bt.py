@@ -144,8 +144,8 @@ def plot_roc_curves(y_true, y_pred_a, y_pred_b, auc_a, auc_b):
 
 def main():
     # 讀取模型 A 和模型 B 的 CSV 文件
-    model_a_path = '../output/BaS/test_avg_preds_labels_kl0.017433288221999882_2025-06-12_15-31-11.csv'
-    model_b_path = '../output/BT/test_avg_preds_labels_step2_2025-06-12_16-41-52.csv'
+    model_a_path = '../output/BaS/test_avg_preds_labels_kl0.0351_2025-11-04_14-47-22.csv'
+    model_b_path = '../output/BT/test_avg_preds_labels_step2_2025-10-14_16-25-13.csv'
     
     logger.info(f"Loading model A predictions from {model_a_path}")
     df_a = pd.read_csv(model_a_path)

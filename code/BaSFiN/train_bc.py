@@ -32,12 +32,12 @@ player_dims        = [50]
 intermediate_dims  = [37]
 dropout_rates      = [0.364]
 mlp_hidden_dims    = [53]
-need_atts          = [True]         
+need_atts          = [False]         
 num_trials         = 1             
 
 patience   = 5
 team_size  = 5
-FOCUS_PID  = 1  
+FOCUS_PID  = 355  
 MIN_MATCH_CNT = 5
 
 path                   = '../data/final_data/data_2013_2024.csv'
@@ -165,7 +165,7 @@ def train_and_evaluate(player_dim, intermediate_dim, dropout_rate, mlp_hidden_di
 
     optimizer  = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.005)
     scheduler  = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5,
-                                                     patience=2, min_lr=1e-6)
+                                                     patience=4, min_lr=1e-6)
     criterion  = nn.BCELoss()
     total_step = len(dataset.train) // batch_size + 1
 

@@ -1,8 +1,8 @@
 import pandas as pd
 
 # 檔案路徑
-stage2_path = "../output/BaS/player_skills_stage2_kl0.0351_2025-07-30_13-58-46.csv"
-test_path = "../output/BaS/player_stats_2025-07-14_22-56-31.csv"
+stage2_path = "../output/BaS/player_skills_stage2_kl0.0351_2025-08-25_16-02-32.csv"
+test_path = "../output/BaS/player_stats_2025-08-25_16-02-32.csv" #不用改
 
 # 讀取 stage2 資料（包含三個 trial）
 df_stage2 = pd.read_csv(stage2_path)

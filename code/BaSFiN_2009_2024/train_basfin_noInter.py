@@ -163,7 +163,7 @@ def train_and_evaluate(
 
     # 建立模型
     model = NAC(
-        n_hero=dataset.n_individual,
+        n_player=dataset.n_individual,
         bc_player_dim=bc_player_dim,
         anfm_player_dim=anfm_player_dim,
         team_size=team_size,

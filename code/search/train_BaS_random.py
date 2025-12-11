@@ -49,7 +49,7 @@ def evaluate(pred, label):
 # ------------------ 訓練迴圈 -------------------
 def train_and_evaluate(kl_w, lr, dataset, idx, trial):
     model = NAC_BBB(dataset.n_individual, team_size, device, 0, 1).to(device)
-    opt   = optim.AdamW(model.parameters(), lr=lr, weight_decay=0)
+    opt   = optim.AdamW(model.parameters(), lr=lr, weight_decay=0.005)
     sch   = optim.lr_scheduler.ReduceLROnPlateau(opt, 'max', .5, 2, 1e-6)
 
     best_val, best_test, best_met, patience = -1e9, -1e9, {}, 0
@@ -108,7 +108,7 @@ def main():
     logger.info("=== Random log-uniform search KL & LR ===")
     N_SAMPLES = 50
     rng = np.random.RandomState(SEED)
-    kl_list = rng.uniform(0.001, 0.01, N_SAMPLES)
+    kl_list = rng.uniform(0.001, 0.1, N_SAMPLES)
     # kl_list = 10 ** rng.uniform(np.log10(0.0005), np.log10(0.001), N_SAMPLES)
     lr_list = rng.uniform(0.005, 0.05, N_SAMPLES)
 
