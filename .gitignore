@@ -1,18 +1,34 @@
-# Ignore data folder entirely
-data/
+# ========================================
+# Ignore LARGE DATA
+# ========================================
 data/**
+!data/README.md
+!data/player_id_mapping_2009_2024.csv
 
-# Ignore common large files
+# ========================================
+# Ignore model checkpoints / tensors
+# ========================================
 *.pt
-*.json
+*.pth
+*.ckpt
+
+# ========================================
+# Ignore raw csv except manually allowed ones
+# ========================================
 *.csv
+!player_id_mapping_2009_2024.csv
 
+# ========================================
 # Ignore generated feature/tensor folders
-**/tensor/*
-**/ema/*
-**/ema_tensor/*
-**/feature_csv/*
-**/final_data/*
-**/year_merge/*
-**/output/*
+# ========================================
+**/tensor/**
+**/ema/**
+**/ema_tensor/**
+**/final_data/**
+**/output/**
 
+# ========================================
+# Ignore python cache
+# ========================================
+__pycache__/
+*.pycls
