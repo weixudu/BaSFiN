@@ -272,3 +272,15 @@ for data_path in all_data_files:
 
     print(f"\n✅ 已儲存至：{out_path_ses}")
     print(f"→ 張量維度：{list(tensor_data_ses.shape)}")
+
+# ===== 輸出每個特徵的平均 RMSE =====
+mean_rmse_per_feature = first_overall_rmse_df_ses.mean().sort_values(ascending=False)
+
+print("\n=== 各特徵跨球員平均 RMSE ===")
+print(mean_rmse_per_feature)
+
+rmse_out_path = os.path.join(output_dir, "rmse_summary.csv")
+mean_rmse_per_feature.to_csv(rmse_out_path)
+
+print(f"\n✅ RMSE summary saved to: {rmse_out_path}")
+
