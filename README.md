@@ -23,10 +23,11 @@ Install required Python dependencies:
 
 The repository is organized as follows:
 
-    BaSFiN_code/
+    BaSFiN
     ├── code/                   # Main codebase for all experiments
     ├── data/                   # Feature and roster datasets (not publicly included)
     ├── .gitignore
+    ├── requirements.txt
     └── README.md
 
 ---
