@@ -103,7 +103,9 @@ Both panels are generated using player-level statistics derived from the 2013–
 
 The results are reproduced by executing the corresponding analysis scripts under:
   
-  -`code/BaSFiN/train_basfin_noInter.py`
+  -`code/Baseline Models/BT.py`
+  -`code/BaSFiN/train_BaS.py`
+  -`code/BaSFiN//statistic/BaS_vs_Bt.py`
 
 ---
 
