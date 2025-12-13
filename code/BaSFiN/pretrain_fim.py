@@ -105,7 +105,7 @@ def train_anfm(dataset, criterion, total_step):
         game_id_mapping_path=game_id_mapping_path
     ).to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate*0.1, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate*0.1, weight_decay=0.005, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
 
@@ -186,7 +186,7 @@ def train_nac_bbb(dataset, total_step):
         prior_mu=0,
         prior_sigma=1
     ).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0.005, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     
@@ -274,7 +274,7 @@ def train_fimodel(dataset, criterion, total_step, game_id_mapping, game_ids_dict
     )
 
     model = model.to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate*0.1, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate*0.1, weight_decay=0.005, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     
@@ -457,4 +457,5 @@ def main():
     logger.info(f'Training completed at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
 if __name__ == "__main__":
+
     main()
