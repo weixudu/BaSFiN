@@ -187,6 +187,7 @@ strategy and classifier architecture under a controlled experimental setting,
 rather than to introduce additional model comparisons.
 
 ---
+### Table 2 - Feature screening via RMSE
 
 - Dataset: 2013–2024
 
