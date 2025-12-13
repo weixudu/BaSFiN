@@ -69,7 +69,7 @@ os.makedirs(save_dir, exist_ok=True)
 
 # ------------------- Logger ------------------- #
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_file  = os.path.join(log_dir, f"BaSFiN_noInter_AdamW{timestamp}.log")
+log_file  = os.path.join(log_dir, f"BaSFiN_noInter_SGD{timestamp}.log")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -251,8 +251,8 @@ def train_and_evaluate(
         logger.error("No trainable parameters – abort."); return None, None, None, None, None
 
     # ---------- Optimizer / Scheduler ---------- #
-    optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()),
-                            lr=learning_rate, weight_decay=0.05)
+    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()),
+                            lr=learning_rate, weight_decay=0.005, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5,
                                                      patience=4, min_lr=1e-6)
 
@@ -328,7 +328,7 @@ def train_and_evaluate(
             best_score  = avg_score_contrib
             patience_cnt = 0
             save_path = os.path.join(save_dir,
-                f"nac_prob{prob_dim}_drop{dropout}_lr{learning_rate}_AdamW_stage{stage_idx}_trial{trial_idx}.pth")
+                f"nac_prob{prob_dim}_drop{dropout}_lr{learning_rate}_SGD_stage{stage_idx}_trial{trial_idx}.pth")
             torch.save(best_state, save_path)
             logger.info(f"*** New best {key_phase} AUC {best_metric:.4f} (epoch {epoch}) saved → {save_path}")
         else:
@@ -453,5 +453,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
