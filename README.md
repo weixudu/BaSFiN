@@ -104,7 +104,9 @@ Both panels are generated using player-level statistics derived from the 2013–
 The results are reproduced by executing the corresponding analysis scripts under:
   
   -`code/Baseline Models/BT.py`
+  
   -`code/BaSFiN/train_BaS.py`
+  
   -`code/BaSFiN//statistic/BaS_vs_Bt.py`
 
 ---
@@ -157,7 +159,7 @@ performance variability.
 
 ### Figure 5 — Validation AUC Comparison Across Training Strategies and Model Architectures
 
-- Dataset: 2013–2024
+- Dataset: 2009–2024
 
 Figure 5 compares validation AUC across different BaSFiN model variants as a function
 of the probabilistic latent dimension.
