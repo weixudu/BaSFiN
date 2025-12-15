@@ -255,11 +255,13 @@ def train_and_evaluate(
         ])
     else:
         # Stage-0 只訓練 final_mlp
-        optimizer = optim.AdamW(
+        optimizer = optim.SGD(
             filter(lambda p: p.requires_grad, model.parameters()),
             lr=learning_rate,
-            weight_decay=0.005
-        )
+            weight_decay=0,
+            momentum=0.9
+         )
+
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5,
