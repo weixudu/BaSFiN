@@ -132,10 +132,8 @@ def main():
 
     N_SAMPLES = 20
     rng = np.random.RandomState(SEED)
-    kl_list = np.exp(
-    rng.uniform(np.log(0.005), np.log(0.5), N_SAMPLES))
-    lr_list = np.exp(
-    rng.uniform(np.log(0.005), np.log(0.05), N_SAMPLES))
+    kl_list = rng.uniform(0.005, 0.5, N_SAMPLES)
+    lr_list = rng.uniform(0.001, 0.01, N_SAMPLES)
 
     best_valid_auc, best_cfg = -1e9, None
 
