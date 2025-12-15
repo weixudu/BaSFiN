@@ -15,7 +15,7 @@ import pandas as pd
 import csv
 
 # 追蹤的 Player IDs
-TRACK_PLAYER_IDS = [132, 438, 1, 355, 544 ,1147 ,1168,1019,876,148]
+TRACK_PLAYER_IDS = [513, 132, 623, 510, 582, 1254, 1209, 615, 1092, 1076]
 # 設置隨機種子
 SEED = 42
 random.seed(SEED)
@@ -101,7 +101,7 @@ def save_player_skills_csv(skill_mus_list, skill_sigmas_list, dataset, phase, st
 def train_and_evaluate(kl_weight, dataset, n_epochs, batch_size, learning_rate, num_samples, device, early_stop_patience, idx, trial_idx,
                         track_sigma=False, track_pids=None, sigma_tracking_path=None):
     model = NAC_BBB(dataset.n_individual, team_size=dataset.team_size, device=device, prior_mu=0, prior_sigma=1).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0.005, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=4, min_lr=1e-6)
     total_step = len(dataset.train) // batch_size + 1
     best_valid_auc = float('-inf')
