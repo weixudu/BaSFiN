@@ -38,20 +38,20 @@ game_id_mapping_path = '../data/tensor/game_id_mapping.json'
 model_save_dir = 'model/pretrain_BaSFiN_model'
 
 # Best hyperparameters
-anfm_player_dim = 49
-anfm_hidden_dim = 29
-anfm_need = True
-anfm_drop = 0.169
-anfm_mlplayer = 56
+anfm_player_dim = 31
+anfm_hidden_dim = 55
+anfm_need = False
+anfm_drop = 0.245
+anfm_mlplayer = 35
 
-kl_weight = 0.017433288221999882
+kl_weight = 0.01519
 num_samples = 100
 
-bc_player_dim = 50
-bc_intermediate_dim = 37
-bc_drop = 0.364
-bc_mlplayer = 53
-bc_need = True
+bc_player_dim = 54
+bc_intermediate_dim = 20
+bc_drop = 0.274
+bc_mlplayer = 38
+bc_need = False
 
 
 
@@ -186,7 +186,7 @@ def train_nac_bbb(dataset, total_step):
         prior_mu=0,
         prior_sigma=1
     ).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0.005, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     
@@ -274,7 +274,7 @@ def train_fimodel(dataset, criterion, total_step, game_id_mapping, game_ids_dict
     )
 
     model = model.to(device)
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate*0.1, weight_decay=0.005, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate*0.1, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     
@@ -457,6 +457,4 @@ def main():
     logger.info(f'Training completed at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
 if __name__ == "__main__":
-
     main()
-
