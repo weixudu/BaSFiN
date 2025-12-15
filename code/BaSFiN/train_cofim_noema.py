@@ -35,7 +35,7 @@ mlp_hidden_dims = [56]
 patience = 5
 team_size = 5
 path = '../data/final_data/data_2013_2024.csv'
-num_trials = 10
+num_trials = 1
 output_dir = '../output/CO_FIM_NOEMA'
 model_dir = os.path.join(output_dir, 'models')
 
@@ -88,7 +88,7 @@ def train_and_evaluate(player_dim, hidden_dim, need_att, dropout_rate, mlp_hidde
         dropout_rate=dropout_rate,
         device=device
     ).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     criterion = nn.BCELoss()
