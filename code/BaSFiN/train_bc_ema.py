@@ -40,7 +40,7 @@ team_size = 5
 path = '../data/final_data/data_2013_2024.csv'
 ema_tensor_path = '../data/ema_tensor/ematensor.pt'
 game_id_mapping_path = '../data/tensor/game_id_mapping.json'
-num_trials = 10
+num_trials = 1
 output_dir = '../output/FIM'
 model_dir = os.path.join(output_dir, 'models')
 
@@ -97,7 +97,7 @@ def train_and_evaluate(player_dim, intermediate_dim, dropout_rate, mlp_hidden_di
         need_att=need_att
     )
     model = model.to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     criterion = nn.BCELoss()
