@@ -10,7 +10,21 @@ import os
 from datetime import datetime
 import json
 import gc
-from BaSFiN_noInter import NAC
+# --- robust import so this script works with `-m` and direct execution
+import sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]  # .../code
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    # 如果你是用 package 方式執行：python -m search.train_basfin_random_noInter
+    from search.BaSFiN_noInter import NAC
+except ImportError:
+    # 如果你是直接跑檔案：python search/train_basfin_random_noInter.py
+    from BaSFiN_noInter import NAC
+
+from data import Data
+
 from data import Data
 
 # Set random seed
@@ -35,20 +49,20 @@ early_stop_patience = 5
 learning_rate = 0.00005   # Fixed learning rate
 freeze_modules = True
 num_trials = 5
-num_combinations = 121
+num_combinations = 57
 
 # Best hyperparameters
-anfm_player_dim = 49
-anfm_hidden_dim = 29
-anfm_need = True
-anfm_drop = 0.169
-anfm_mlplayer = 56
-kl_weight = 0.017433288221999882
-bc_player_dim = 50
-bc_intermediate_dim = 37
-bc_drop = 0.364
-bc_mlplayer = 53
-bc_need = True
+anfm_player_dim = 31
+anfm_hidden_dim = 55
+anfm_need = False
+anfm_drop = 0.245
+anfm_mlplayer = 35
+kl_weight = 0.01519
+bc_player_dim = 54
+bc_intermediate_dim = 20
+bc_drop = 0.274
+bc_mlplayer = 38
+bc_need = False
 
 
 path               = "../data/final_data/data_2013_2024.csv"
@@ -188,8 +202,8 @@ def train_and_evaluate(dataset, n_epochs, batch_size, learning_rate, num_samples
     else:
         logger.info("Trainable parameters found, proceeding with training")
 
-    optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), 
-                           lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), 
+                           lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     total_step = len(dataset.train) // batch_size + 1
@@ -223,10 +237,11 @@ def train_and_evaluate(dataset, n_epochs, batch_size, learning_rate, num_samples
         avg_loss = total_loss / total_step
         logger.info(f'Epoch [{epoch + 1}/{n_epochs}], Average Loss: {avg_loss:.4f}')
         grad_norms = compute_gradient_norm(model)
-        logger.info(f'Trial {trial_idx}, Epoch [{epoch + 1}/{n_epochs}], Gradient Norms: '
-                    f'nac_bbb: {grad_norms["nac_bbb"]:.4f}, '
-                    f'fimodel: {grad_norms["fimodel"]:.4f}, '
-                    f'nac_anfm: {grad_norms["nac_anfm"]:.4f}')
+        logger.info(f'Epoch [{epoch + 1}/{n_epochs}], Gradient Norms: '
+           f'nac_bbb: {grad_norms["nac_bbb"]:.4f}, '
+           f'fimodel: {grad_norms["fimodel"]:.4f}, '
+           f'nac_anfm: {grad_norms["nac_anfm"]:.4f}')
+
             
         model.eval()
         phases = ['train', 'valid', 'test']
@@ -335,7 +350,7 @@ def main():
     # for _ in range(num_combinations):
             # Randomly sample parameters
             # prob_dim = random.randint(8, 32)
-    for prob_dim in range(8, 129):
+    for prob_dim in range(8, 64):
         dropout = 0.2
 
         logger.info(f'\n=== Testing combination {combo_idx + 1}/{num_combinations}: '
