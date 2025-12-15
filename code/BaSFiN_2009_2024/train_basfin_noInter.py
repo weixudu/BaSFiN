@@ -22,28 +22,28 @@ n_epochs = 200
 batch_size = 32
 team_size = 5
 num_samples = 100
-learning_rate = 1e-5
+learning_rate = 5e-5
 early_stop_patience = 5
 NUM_TRIALS = 5
 
 prior_mu = 0.0
 prior_sigma = 1.0
-kl_weight = 0.017433288221999882
+kl_weight = 0.01519
 
 prob_dim = 64
 dropout = 0.2
 
-anfm_player_dim = 49
-anfm_hidden_dim = 29
-anfm_need = True
-anfm_drop = 0.169
-anfm_mlplayer = 56
+anfm_player_dim = 31
+anfm_hidden_dim = 55
+anfm_need = False
+anfm_drop = 0.245
+anfm_mlplayer = 35
 
-bc_player_dim = 50
-bc_intermediate_dim = 37
-bc_drop = 0.364
-bc_mlplayer = 53
-bc_need = True
+bc_player_dim = 54
+bc_intermediate_dim = 20
+bc_drop = 0.274
+bc_mlplayer = 38
+bc_need = False
 
 # 日誌設置
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -493,6 +493,17 @@ def main():
             trial_best_paths.append(best_model_path)
             logger.info(f"=== Trial {trial_idx} completed : "
                         f"Best Val AUC {best_val_auc:.4f} | Best Test AUC {best_test_auc:.4f} ===")
+
+        logger.info("\n========== Trial Summary ==========")
+        logger.info(f"Year {end_year}: NUM_TRIALS={NUM_TRIALS}")
+        for i in range(len(stage0_aucs)):
+            logger.info(f"Trial {i}: S0={stage0_aucs[i]:.4f}, S1={stage1_aucs[i]:.4f}")
+        if stage0_aucs:
+            logger.info(f"S0 AUC: {np.mean(stage0_aucs):.4f} ± {np.std(stage0_aucs):.4f}")
+        if stage1_aucs:
+            logger.info(f"S1 AUC: {np.mean(stage1_aucs):.4f} ± {np.std(stage1_aucs):.4f}")
+        logger.info("="*50)
+
 
         # 年份結束後，log summary
         if stage0_aucs:
