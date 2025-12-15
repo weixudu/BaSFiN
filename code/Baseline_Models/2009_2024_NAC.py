@@ -212,7 +212,7 @@ def train_and_evaluate(dataset, n_epochs, batch_size, learning_rate, device, ear
     seed = SEED + trial_idx
     random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
     model = NAC(dataset.n_individual, team_size=dataset.team_size, hidden_dim=hidden_dim, device=device).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     criterion = nn.BCELoss()
