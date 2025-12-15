@@ -105,7 +105,7 @@ def train_anfm(dataset, criterion, total_step):
         game_id_mapping_path=game_id_mapping_path
     ).to(device)
 
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate*0.1, weight_decay=0.005, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate*0.1, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
 
@@ -459,3 +459,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
