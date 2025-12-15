@@ -69,7 +69,7 @@ os.makedirs(save_dir, exist_ok=True)
 
 # ------------------- Logger ------------------- #
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_file  = os.path.join(log_dir, f"BaSFiN_noInter_SGD{timestamp}.log")
+log_file  = os.path.join(log_dir, f"BaSFiN_noInter_SGD_{timestamp}.log")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -251,10 +251,8 @@ def train_and_evaluate(
         logger.error("No trainable parameters – abort."); return None, None, None, None, None
 
     # ---------- Optimizer / Scheduler ---------- #
-    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()),
-                            lr=learning_rate, weight_decay=0.005, momentum=0.9)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5,
-                                                     patience=4, min_lr=1e-6)
+    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=learning_rate, weight_decay=0, momentum=0.9)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5, patience=4, min_lr=1e-6)
 
     total_step = len(dataset.train) // batch_size + 1
     best_metric = float("-inf"); best_epoch = -1
@@ -453,6 +451,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
