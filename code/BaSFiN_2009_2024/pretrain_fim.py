@@ -67,13 +67,23 @@ def evaluate(pred, label):
     return auc, acc, logloss
 
 def elbo_loss(model, X, y, kl_weight, num_samples, device):
-    """NAC_BBB 的 ELBO 損失。"""
+    """
+    NAC_BBB 的 ELBO（數值穩定版）
+    """
     y_tensor = torch.tensor(y, dtype=torch.float, device=device)
     y_repeated = y_tensor.unsqueeze(0).repeat(num_samples, 1)
-    prob, _ = model(X, num_samples=num_samples)
-    log_likelihood = -nn.BCELoss(reduction='sum')(prob, y_repeated) / num_samples
+
+    # logits ∈ R
+    logits, _ = model(X, num_samples=num_samples)
+
+    # ✅ 正確：BCEWithLogitsLoss
+    log_likelihood = -nn.BCEWithLogitsLoss(reduction='sum')(
+        logits, y_repeated
+    ) / num_samples
+
     kl_loss = model.kl_divergence()
     return -log_likelihood + kl_weight * kl_loss
+
 
 # ========= 三種模型訓練函式 ===========================================
 def train_anfm(dataset, criterion, total_step, ema_tensor_path, game_id_mapping_path, log_prefix='ANFM'):
@@ -90,7 +100,7 @@ def train_anfm(dataset, criterion, total_step, ema_tensor_path, game_id_mapping_
         game_id_mapping_path=game_id_mapping_path
     ).to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate * 0.1, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate * 0.1, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max',
                                                      factor=0.5, patience=2, min_lr=1e-6)
 
@@ -155,40 +165,43 @@ def train_nac_bbb(dataset, total_step, kl_weight, num_samples, log_prefix='NAC_B
         prior_sigma=1
     ).to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr= 0.001, weight_decay=0)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max',
-                                                     factor=0.5, patience=2, min_lr=1e-6)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='max', factor=0.5, patience=2, min_lr=1e-6
+    )
 
     best_valid_auc = -float('inf')
     best_metrics = None
     patience_counter = 0
 
     for epoch in range(n_epochs):
-        # --------- 訓練 ---------
+        # -------- train --------
         model.train()
-        total_loss = 0
-        for i, (X, y) in enumerate(dataset.get_batch(batch_size, shuffle=False)):
+        for X, y in dataset.get_batch(batch_size, shuffle=False):
             X_tensor = torch.LongTensor(X).to(device)
             loss = elbo_loss(model, X_tensor, y, kl_weight, num_samples, device)
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            total_loss += loss.item()
 
-        # --------- 評估 ---------
+        # -------- eval --------
         model.eval()
-        phases = ['train', 'valid', 'test']
         results = {}
 
-        for phase in phases:
+        for phase in ['train', 'valid', 'test']:
             preds, labels = [], []
             for X, y in dataset.get_batch(batch_size, phase, shuffle=False):
                 with torch.no_grad():
                     X_tensor = torch.LongTensor(X).to(device)
-                    prob, _ = model(X_tensor, num_samples=num_samples)
-                    prob_mean = torch.mean(prob, dim=0)  # 對樣本取平均
-                    preds.append(prob_mean.cpu())
+                    logits, _ = model(X_tensor, num_samples=num_samples)
+
+                    # ✅ 評估時再 sigmoid + 平均
+                    prob = torch.sigmoid(logits).mean(dim=0)
+
+                    preds.append(prob.cpu())
                     labels.append(y)
+
             y_true = np.concatenate(labels)
             y_pred = torch.cat(preds)
             auc, acc, logloss = evaluate(y_pred, y_true)
@@ -208,6 +221,7 @@ def train_nac_bbb(dataset, total_step, kl_weight, num_samples, log_prefix='NAC_B
 
     return best_state, best_valid_auc, best_metrics
 
+
 def train_fimodel(dataset, criterion, total_step,
                   ema_tensor_path, game_id_mapping_path, log_prefix='FIModel'):
     model = FIModel(
@@ -223,7 +237,7 @@ def train_fimodel(dataset, criterion, total_step,
         need_att=bc_need
     ).to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate * 0.1, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate * 0.1, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max',
                                                      factor=0.5, patience=2, min_lr=1e-6)
 
