@@ -28,16 +28,16 @@ n_epochs = 200
 batch_size = 32
 learning_rate = 1e-4
 
-player_dims        = [50]
-intermediate_dims  = [37]
-dropout_rates      = [0.364]
-mlp_hidden_dims    = [53]
-need_atts          = [True]         
-num_trials         = 1             
+player_dims        = [54]
+intermediate_dims  = [20]
+dropout_rates      = [0.274]
+mlp_hidden_dims    = [38]
+need_atts          = [False]         
+num_trials         = 5        
 
 patience   = 5
 team_size  = 5
-FOCUS_PID  = 1 
+FOCUS_PID  = 355
 MIN_MATCH_CNT = 5
 
 path                   = '../data/final_data/data_2013_2024.csv'
@@ -204,7 +204,7 @@ def train_and_evaluate(player_dim, intermediate_dim, dropout_rate, mlp_hidden_di
         avg_loss = total_loss / total_step
         logger.info(f'Phase {phase}, Epoch [{epoch+1}/{n_epochs}], Avg Loss: {avg_loss:.4f}')
 
-        # -------- Validation / Test --------
+                # -------- Validation / Test --------
         model.eval()
         parts = ['train', 'valid', 'test'] if phase == 'step1' else ['train', 'test']
         results = {}
@@ -221,17 +221,32 @@ def train_and_evaluate(player_dim, intermediate_dim, dropout_rate, mlp_hidden_di
                     preds.append(probs)
                     labels.append(y)
 
+            if len(labels) == 0:
+                # ★ 新增：如果這個 split 沒資料，就跳過，避免後面 KeyError
+                continue
+
             y_true = np.concatenate(labels)
             y_pred = torch.cat(preds).cpu().numpy()
             auc, acc, logloss = evaluate(y_pred, y_true)
 
             results[part] = dict(auc=auc, acc=acc, logloss=logloss)
+
+            # ★ 新增：這一行 log 格式專門給 bc_compare 的 METRIC_TMPL_NEW 用
             logger.info(
-                f'Phase {phase}, Trial {trial_idx}, Epoch [{epoch+1}/{n_epochs}], '
+                f'Phase {phase}, '
+                f'Player Dim {player_dim}, Intermediate Dim {intermediate_dim}, '
+                f'Dropout {dropout_rate}, MLP Hidden {mlp_hidden_dim}, '
+                f'Need Att {need_att}, '
+                f'Trial {trial_idx}, '
+                f'Epoch [{epoch+1}/{n_epochs}], '
                 f'{part.capitalize()} AUC: {auc:.4f}, Acc: {acc:.4f}, Logloss: {logloss:.4f}'
             )
 
-        current_auc = results.get('valid', results['test'])['auc']
+        # ★ 新增：如果沒 valid 但有 test，就用 test 當作 valid（避免 bc_compare 找不到 valid）
+        if 'valid' not in results and 'test' in results:
+            results['valid'] = results['test']
+
+        current_auc = results.get('valid', results['test'])['auc']   # 你原本的 early-stop 指標可以保持
         scheduler.step(current_auc)
 
         if current_auc > best_valid_auc:
@@ -243,15 +258,25 @@ def train_and_evaluate(player_dim, intermediate_dim, dropout_rate, mlp_hidden_di
             model_path = os.path.join(model_dir,
                         f'best_model_combo{combo_idx}_trial{trial_idx}_{phase}_{timestamp}.pth')
             torch.save(best_model_state, model_path)
-            logger.info(f'Phase {phase}, Trial {trial_idx}, New best AUC={best_valid_auc:.4f} '
-                        f'at epoch {best_epoch}, Model saved → {model_path}')
+            logger.info(f'Phase {phase}, Trial {trial_idx}, '
+                       f'New best AUC: {best_valid_auc:.4f} at epoch {best_epoch}, '
+                       f'Model saved to {model_path}')
+
+            # ★ 新增：這一行格式給 bc_compare 的 RE_EARLY_STOP_OLD 用
+            logger.info(
+                f'Phase {phase}, Trial {trial_idx}, '
+                f'Early stopping triggered after {epoch+1} epochs, best epoch was {best_epoch}'
+            )
         else:
             patience_cnt += 1
-            logger.info(f'Phase {phase}, Trial {trial_idx}, Patience {patience_cnt}/{patience}')
+            logger.info(f'Phase {phase}, Trial {trial_idx}, '
+                       f'No improvement in AUC, patience counter: {patience_cnt}/{patience}')
 
         if patience_cnt >= patience:
-            logger.info(f'Phase {phase}, Trial {trial_idx}, Early-stop at epoch {epoch+1}')
+            logger.info(f'Phase {phase}, Trial {trial_idx}, '
+                       f'Early stopping triggered after {epoch+1} epochs, best epoch was {best_epoch}')
             break
+
 
     return best_valid_auc, best_metrics, best_model_state, best_test_preds, best_test_labels
 
@@ -342,7 +367,7 @@ def main():
         ema_tensor_path, 
         combo_idx=0, trial_idx=0, need_att=best_combo['need_att'], phase='step2'
     )
-
+    logger.info(f"Test Average AUC: {metrics['test']['auc']:.4f}, Avg Acc: {metrics['test']['acc']:.4f}, Avg Logloss: {metrics['test']['logloss']:.4f}")
     # ---------- 載入最終模型 ----------
     best_model = FIModel(
         n_player = dataset.n_individual,
