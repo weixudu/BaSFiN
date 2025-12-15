@@ -39,7 +39,7 @@ class BT(nn.Module):
         return team_skill  
 
 class ANFM(nn.Module):
-    def __init__(self, n_player, team_size, hidden_dim, need_att=True):
+    def __init__(self, n_player, team_size, hidden_dim, need_att=False):
         super(ANFM, self).__init__()
         assert(n_player > 1 and team_size > 1)  
         self.n_player = n_player
@@ -207,7 +207,7 @@ def evaluate(pred, label):
 
 def train_and_evaluate(dataset, n_epochs, batch_size, learning_rate, device, early_stop_patience, trial_idx, phase='step1'):
     model = NAC(dataset.n_individual, team_size=dataset.team_size, hidden_dim=hidden_dim, device=device).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0.005, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=4, min_lr=1e-6)
     criterion = nn.BCELoss()
