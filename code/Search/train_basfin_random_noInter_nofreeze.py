@@ -25,6 +25,8 @@ except ImportError:
 
 from data import Data
 
+from data import Data
+
 # Set random seed
 SEED = 42
 random.seed(SEED)
@@ -45,10 +47,9 @@ prior_sigma = 1.0
 num_samples = 100
 early_stop_patience = 5
 learning_rate = 0.00005   # Fixed learning rate
-freeze_modules = False
+freeze_modules = True
 num_trials = 5
 num_combinations = 57
-
 
 # Best hyperparameters
 anfm_player_dim = 49
@@ -75,7 +76,7 @@ log_dir            = "logs/NAC+"
 log_dir = 'logs/NAC+'
 os.makedirs(log_dir, exist_ok=True)
 os.makedirs(save_dir, exist_ok=True)
-log_file = os.path.join(log_dir, f'BaSFiN_128_noInter_nofreeze{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+log_file = os.path.join(log_dir, f'BaSFiN_128_noInter_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -201,8 +202,8 @@ def train_and_evaluate(dataset, n_epochs, batch_size, learning_rate, num_samples
     else:
         logger.info("Trainable parameters found, proceeding with training")
 
-    optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), 
-                           lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), 
+                           lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     total_step = len(dataset.train) // batch_size + 1
