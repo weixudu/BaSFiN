@@ -23,13 +23,13 @@ batch_size = 32
 learning_rate = 0.0001
 player_dims = [49]
 hidden_dims = [29]
-need_atts = [False]
+need_atts = [True]
 weight_decay = 0.005
 dropout_rates = [0.169]
 mlp_hidden_dims = [56]
 patience = 5
 team_size = 5
-FOCUS_PID  = 1
+FOCUS_PID  = 355
 COOP_MIN_CNT = 50          
 
 path = '../data/final_data/data_2013_2024.csv'
@@ -130,7 +130,7 @@ def train_and_evaluate(player_dim, hidden_dim, need_att, dropout_rate, mlp_hidde
         ema_tensor_path=ema_tensor_path,
         game_id_mapping_path=game_id_mapping_path
     ).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     criterion = nn.BCELoss()
