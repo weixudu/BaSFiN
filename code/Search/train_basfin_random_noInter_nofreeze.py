@@ -25,8 +25,6 @@ except ImportError:
 
 from data import Data
 
-from data import Data
-
 # Set random seed
 SEED = 42
 random.seed(SEED)
@@ -47,22 +45,23 @@ prior_sigma = 1.0
 num_samples = 100
 early_stop_patience = 5
 learning_rate = 0.00005   # Fixed learning rate
-freeze_modules = True
+freeze_modules = False
 num_trials = 5
 num_combinations = 57
 
+
 # Best hyperparameters
-anfm_player_dim = 49
-anfm_hidden_dim = 29
-anfm_need = True
-anfm_drop = 0.169
-anfm_mlplayer = 56
-kl_weight = 0.017433288221999882
-bc_player_dim = 50
-bc_intermediate_dim = 37
-bc_drop = 0.364
-bc_mlplayer = 53
-bc_need = True
+anfm_player_dim = 31
+anfm_hidden_dim = 55
+anfm_need = False
+anfm_drop = 0.245
+anfm_mlplayer = 35
+kl_weight = 0.01519
+bc_player_dim = 54
+bc_intermediate_dim = 20
+bc_drop = 0.274
+bc_mlplayer = 38
+bc_need = False
 
 
 path               = "../data/final_data/data_2013_2024.csv"
@@ -76,7 +75,7 @@ log_dir            = "logs/NAC+"
 log_dir = 'logs/NAC+'
 os.makedirs(log_dir, exist_ok=True)
 os.makedirs(save_dir, exist_ok=True)
-log_file = os.path.join(log_dir, f'BaSFiN_128_noInter_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+log_file = os.path.join(log_dir, f'BaSFiN_128_noInter_nofreeze{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
