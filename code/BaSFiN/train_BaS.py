@@ -30,7 +30,7 @@ torch.backends.cudnn.benchmark = True
 device = torch.device('cpu')
 n_epochs = 200
 batch_size = 32
-learning_rate =  0.00833
+learning_rate =  0.02046
 path = '../data/final_data/data_2013_2024.csv'
 team_size = 5
 prior_mu = 0
@@ -58,10 +58,17 @@ logger = logging.getLogger(__name__)
 def elbo_loss(model, X, y, kl_weight, num_samples, device):
     y_tensor = torch.tensor(y, dtype=torch.float, device=device)
     y_repeated = y_tensor.unsqueeze(0).repeat(num_samples, 1)
-    prob, _ = model(X, num_samples=num_samples)
-    log_likelihood = -nn.BCELoss(reduction='sum')(prob, y_repeated) / num_samples
+
+    # ✅ logits, not probability
+    logits, _ = model(X, num_samples=num_samples)
+
+    log_likelihood = -nn.BCEWithLogitsLoss(reduction='sum')(
+        logits, y_repeated
+    ) / num_samples
+
     kl_loss = model.kl_divergence()
     return -log_likelihood + kl_weight * kl_loss
+
 
 def evaluate(pred, label):
     pred = pred.reshape(-1)
@@ -218,7 +225,7 @@ def main():
     dataset = Data(path, team_size=team_size, seed=SEED)
     logger.info("Starting Expanding Window training with multiple trials")
 
-    kl_weight_candidates = [0.05191]
+    kl_weight_candidates = [0.02806]
     logger.info(f"KL weight candidates: {[round(x, 6) for x in kl_weight_candidates]}")
 
     # Step 1: Initial Training and Validation
