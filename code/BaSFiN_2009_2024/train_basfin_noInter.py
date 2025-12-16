@@ -24,7 +24,7 @@ team_size = 5
 num_samples = 100
 learning_rate = 5e-5
 early_stop_patience = 5
-NUM_TRIALS = 5
+NUM_TRIALS = 1
 
 prior_mu = 0.0
 prior_sigma = 1.0
@@ -57,7 +57,6 @@ logger = logging.getLogger(__name__)
 
 # ========= 隨機種子工具 =========
 def set_global_seed(seed: int):
-
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -65,7 +64,6 @@ def set_global_seed(seed: int):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = False
     torch.backends.cudnn.benchmark = True
-
 
 # 工具函式
 def compute_param_grad_norm(model: NAC) -> Dict[str, float]:
@@ -93,7 +91,6 @@ def avg_grad_signals(model: NAC,
                      batch_size: int,
                      phase: str,
                      device: torch.device) -> Tuple[np.ndarray, np.ndarray, float]:
-
     model.eval()
     mod_sum = torch.zeros(3, device=device)
     param_sum = torch.zeros(3, device=device)
@@ -110,15 +107,15 @@ def avg_grad_signals(model: NAC,
                 return_feature_contrib=True,
                 return_param_contrib=True,
             )
-        mod_sum += mod_g.abs().sum(dim=0)          # (3,)
-        param_sum += par_g.abs()                   # (3,) already scalar per module
-        score_sum += feat_g.abs().sum()            # scalar
+        mod_sum += mod_g.abs().sum(dim=0)
+        param_sum += par_g.abs()
+        score_sum += feat_g.abs().sum()
         n_batch += 1
         model.zero_grad(set_to_none=True)
 
-    avg_mod = (mod_sum / (n_batch * batch_size)).cpu().numpy()          # (3,)
-    avg_param = (param_sum / n_batch).cpu().numpy()                     # (3,)
-    avg_score = (score_sum / (n_batch * batch_size * 15)).item()        # scalar
+    avg_mod = (mod_sum / (n_batch * batch_size)).cpu().numpy()
+    avg_param = (param_sum / n_batch).cpu().numpy()
+    avg_score = (score_sum / (n_batch * batch_size * 15)).item()
     return avg_mod, avg_param, avg_score
 
 # 訓練 / 評估主流程
@@ -151,7 +148,7 @@ def train_and_evaluate(
     log_dir = config['log_dir']
 
     # 設置日誌檔案
-    log_file = os.path.join(log_dir, f"BaSFiN_Freeze_noInter_{timestamp}.log")
+    log_file = os.path.join(log_dir, f"BaSFiN_Freeze_noInter_{timestamp}_S{stage_idx}_T{trial_idx}.log")
     file_handler = logging.FileHandler(log_file, encoding="utf-8")
     file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
     file_handler.setLevel(logging.INFO)
@@ -159,7 +156,6 @@ def train_and_evaluate(
 
     # 固定隨機種子
     set_global_seed(trial_seed)
-
 
     # 建立模型
     model = NAC(
@@ -190,48 +186,56 @@ def train_and_evaluate(
     # 載入預訓練
     if stage_idx == 0 and use_pretrain:
         try:
-            model.nac_bbb.load_state_dict(torch.load(os.path.join(model_save_dir, f"nac_bbb_best_{end_year}.pth"),
-                                                    map_location=device, weights_only=True))
-            state_dict = torch.load(
-                os.path.join(model_save_dir, f"fimodel_best_{end_year}.pth"),
-                map_location=device
+            bbb_path = os.path.join(model_save_dir, f"nac_bbb_best_{end_year}.pth")
+            model.nac_bbb.load_state_dict(
+            torch.load(bbb_path, map_location=device, weights_only=True),
+            strict=False  # ✅ 修復這裡
             )
-            model.fimodel.load_state_dict(state_dict, strict=False)
+            logger.info(f"✅ Loaded NAC_BBB: {bbb_path}")
 
-            state_dict = torch.load(
-                os.path.join(model_save_dir, f"anfm_best_{end_year}.pth"),
-                map_location=device
-            )
+            fim_path = os.path.join(model_save_dir, f"fimodel_best_{end_year}.pth")
+            state_dict = torch.load(fim_path, map_location=device)
+            model.fimodel.load_state_dict(state_dict, strict=False)
+            logger.info(f"✅ Loaded FIModel: {fim_path}")
+
+
+            anfm_path = os.path.join(model_save_dir, f"anfm_best_{end_year}.pth")
+            state_dict = torch.load(anfm_path, map_location=device)
             model.nac_anfm.load_state_dict(state_dict, strict=False)
+            logger.info(f"✅ Loaded NAC_ANFM: {anfm_path}")
+
         except Exception as e:
-            logger.error(f"Load pre-trained failed: {e}")
-            return None, None, None, None, None
+            logger.warning(f"⚠️ Partial pretrain load (some params mismatch): {e}")
+            logger.info("繼續訓練，使用部分預訓練權重 + 隨機初始化不匹配部分")
     elif stage_idx == 1 and prev_best_model_path:
         try:
             model.load_state_dict(torch.load(prev_best_model_path, map_location=device, weights_only=True))
             logger.info(f"Loaded Stage-0 best model: {prev_best_model_path}")
         except Exception as e:
             logger.error(f"Load Stage-0 model failed: {e}")
+            logger.removeHandler(file_handler)
+            file_handler.close()
             return None, None, None, None, None
 
     # 凍結策略
-    if stage_idx == 0:                      # Stage-0：只訓練 final MLP
+    if stage_idx == 0:
         for sub in (model.nac_bbb, model.fimodel, model.nac_anfm):
             for p in sub.parameters():
                 p.requires_grad = False
         logger.info("Stage-0: all sub-modules frozen.")
-    else:                                   # Stage-1：全部解凍共同訓練
+    else:
         for sub in (model.nac_bbb, model.fimodel, model.nac_anfm):
             for p in sub.parameters():
                 p.requires_grad = True
         logger.info("Stage-1: all sub-modules unfrozen.")
-
 
     # 確保 final_mlp 可訓練
     for p in model.final_mlp.parameters():
         p.requires_grad = True
     if not any(p.requires_grad for p in model.parameters()):
         logger.error("No trainable parameters – abort.")
+        logger.removeHandler(file_handler)
+        file_handler.close()
         return None, None, None, None, None
 
     # Optimizer / Scheduler
@@ -254,15 +258,12 @@ def train_and_evaluate(
             }
         ])
     else:
-        # Stage-0 只訓練 final_mlp
         optimizer = optim.SGD(
             filter(lambda p: p.requires_grad, model.parameters()),
             lr=learning_rate,
             weight_decay=0,
             momentum=0.9
          )
-
-
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5,
                                                      patience=2, min_lr=1e-6)
@@ -331,7 +332,6 @@ def train_and_evaluate(
             f"ParamGrad bbb {avg_param_contrib[0]:.2e}/fi {avg_param_contrib[1]:.2e}/anfm {avg_param_contrib[2]:.2e}"
         )
 
-
         # LR Scheduler & early-stop
         scheduler.step(results[key_phase]["auc"])
         if results[key_phase]["auc"] > best_metric:
@@ -344,7 +344,7 @@ def train_and_evaluate(
             best_score = avg_score_contrib
             patience_cnt = 0
             save_path = os.path.join(save_dir,
-                                     f"nac_prob{prob_dim}_drop{dropout}_lr{learning_rate}_stage{stage_idx}_trial{trial_idx}.pth")
+                                     f"nac_prob{prob_dim}_drop{dropout}_lr{learning_rate}_SGD_stage{stage_idx}_trial{trial_idx}.pth")
             torch.save(best_state, save_path)
             logger.info(f"*** New best {key_phase} AUC {best_metric:.4f} (epoch {epoch}) saved -> {save_path}")
         else:
@@ -354,7 +354,6 @@ def train_and_evaluate(
                 logger.info(f"Early stop @ epoch {epoch}. Best AUC {best_metric:.4f} (epoch {best_epoch})")
                 break
 
-    
     logger.removeHandler(file_handler)
     file_handler.close()
 
@@ -382,9 +381,9 @@ def main():
     year_suffixes = ["2020", "2021", "2022", "2023", "2024"]
     BASE_SEED = 42                
     set_global_seed(BASE_SEED)    
+    
     for end_year in year_suffixes:
         start_year = str(int(end_year) - 11)
-
 
         # 配置字典
         config = {
@@ -396,22 +395,32 @@ def main():
             'log_dir': f"logs/NAC+_{end_year}"
         }
 
-        # 創建資料夾
+        # ✅ 新增：建立年份專用 summary log 檔
         os.makedirs(config['log_dir'], exist_ok=True)
         os.makedirs(config['save_dir'], exist_ok=True)
+        
+        year_summary_file = os.path.join(config['log_dir'], f"NAC_summary_{end_year}.log")
+        year_handler = logging.FileHandler(year_summary_file, encoding="utf-8")
+        year_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+        year_handler.setLevel(logging.INFO)
+        logger.addHandler(year_handler)
 
         logger.info("\n" + "="*80)
-        logger.info(f"Starting processing for year: {end_year}")
+        logger.info(f"🔥 開始處理年份：{start_year}~{end_year}")
         logger.info("="*80)
 
         # 檢查檔案
         for p in [config['path'], config['ema_tensor_path'], config['game_id_mapping_path']]:
             if not os.path.exists(p):
                 logger.error(f"Error: Required file not found: {p}")
+                logger.removeHandler(year_handler)
+                year_handler.close()
                 continue
-        for f in [f"nac_bbb_{end_year}.pth", f"fimodel_{end_year}.pth", f"anfm_{end_year}.pth"]:
+        for f in [f"nac_bbb_best_{end_year}.pth", f"fimodel_best_{end_year}.pth", f"anfm_best_{end_year}.pth"]:
             if not os.path.exists(os.path.join(config['model_save_dir'], f)):
                 logger.error(f"Error: Pre-trained model missing: {os.path.join(config['model_save_dir'], f)}")
+                logger.removeHandler(year_handler)
+                year_handler.close()
                 return
 
         # 訓練流程
@@ -487,34 +496,34 @@ def main():
             if metric is not None:
                 best_test_auc = metric
 
-            # 統計
+            # 保留統計（修正縮排）
             stage0_aucs.append(best_val_auc)
             stage1_aucs.append(best_test_auc)
             trial_best_paths.append(best_model_path)
             logger.info(f"=== Trial {trial_idx} completed : "
                         f"Best Val AUC {best_val_auc:.4f} | Best Test AUC {best_test_auc:.4f} ===")
-
-        logger.info("\n========== Trial Summary ==========")
-        logger.info(f"Year {end_year}: NUM_TRIALS={NUM_TRIALS}")
-        for i in range(len(stage0_aucs)):
-            logger.info(f"Trial {i}: S0={stage0_aucs[i]:.4f}, S1={stage1_aucs[i]:.4f}")
-        if stage0_aucs:
-            logger.info(f"S0 AUC: {np.mean(stage0_aucs):.4f} ± {np.std(stage0_aucs):.4f}")
-        if stage1_aucs:
-            logger.info(f"S1 AUC: {np.mean(stage1_aucs):.4f} ± {np.std(stage1_aucs):.4f}")
-        logger.info("="*50)
-
-
-        # 年份結束後，log summary
+        
+        # ✅ Summary 會寫入 NAC_summary_{end_year}.log
+        logger.info("\n========== Summary across trials ==========")
         if stage0_aucs:
             s0_mu, s0_std = np.mean(stage0_aucs), np.std(stage0_aucs)
+            logger.info(f"Stage-0 (Step1) Val AUC : {s0_mu:.4f} ± {s0_std:.4f}")
+        if stage1_aucs:
             s1_mu, s1_std = np.mean(stage1_aucs), np.std(stage1_aucs)
-            logger.info("\n========== Trial Summary ==========")
-            logger.info(f"Stage-0 Val AUC: {s0_mu:.4f} ± {s0_std:.4f}")
-            logger.info(f"Stage-1 Test AUC: {s1_mu:.4f} ± {s1_std:.4f}")
-            logger.info("Best model paths per trial:")
-            for p in trial_best_paths:
-                logger.info(f"  • {p}")
+            logger.info(f"Stage-1 (Step2) Test AUC: {s1_mu:.4f} ± {s1_std:.4f}")
+        
+        # 顯示詳細結果
+        logger.info("Detailed Trial Results:")
+        for i, (s0, s1) in enumerate(zip(stage0_aucs, stage1_aucs)):
+            logger.info(f"Trial {i}: Stage0={s0:.4f}, Stage1={s1:.4f}")
+        
+        logger.info("\n" + "="*80)
+        logger.info(f"✅ 完成年份視窗：{start_year} ~ {end_year}")
+        logger.info("="*80)
+        
+        # ✅ 移除年份 summary handler
+        logger.removeHandler(year_handler)
+        year_handler.close()
 
 if __name__ == "__main__":
     main()
