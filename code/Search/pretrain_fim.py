@@ -185,7 +185,7 @@ def train_nac_bbb(dataset, total_step):
         prior_mu=0,
         prior_sigma=1
     ).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=0, momentum=0.9)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     
