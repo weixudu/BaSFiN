@@ -15,7 +15,7 @@ import pandas as pd
 import csv
 
 # 追蹤的 Player IDs
-TRACK_PLAYER_IDS = [513, 132, 623, 510, 582, 1254, 1209, 615, 1092, 1076]
+TRACK_PLAYER_IDS = [510, 355, 480, 582, 132, 96, 1092, 1053, 1168, 985]
 # 設置隨機種子
 SEED = 42
 random.seed(SEED)
@@ -30,7 +30,7 @@ torch.backends.cudnn.benchmark = True
 device = torch.device('cpu')
 n_epochs = 200
 batch_size = 32
-learning_rate =  0.02046
+learning_rate =  0.00647
 path = '../data/final_data/data_2013_2024.csv'
 team_size = 5
 prior_mu = 0
@@ -58,17 +58,10 @@ logger = logging.getLogger(__name__)
 def elbo_loss(model, X, y, kl_weight, num_samples, device):
     y_tensor = torch.tensor(y, dtype=torch.float, device=device)
     y_repeated = y_tensor.unsqueeze(0).repeat(num_samples, 1)
-
-    # ✅ logits, not probability
-    logits, _ = model(X, num_samples=num_samples)
-
-    log_likelihood = -nn.BCEWithLogitsLoss(reduction='sum')(
-        logits, y_repeated
-    ) / num_samples
-
+    prob, _ = model(X, num_samples=num_samples)
+    log_likelihood = -nn.BCELoss(reduction='sum')(prob, y_repeated) / num_samples
     kl_loss = model.kl_divergence()
     return -log_likelihood + kl_weight * kl_loss
-
 
 def evaluate(pred, label):
     pred = pred.reshape(-1)
@@ -225,7 +218,7 @@ def main():
     dataset = Data(path, team_size=team_size, seed=SEED)
     logger.info("Starting Expanding Window training with multiple trials")
 
-    kl_weight_candidates = [0.02806]
+    kl_weight_candidates = [0.01519]
     logger.info(f"KL weight candidates: {[round(x, 6) for x in kl_weight_candidates]}")
 
     # Step 1: Initial Training and Validation
@@ -517,3 +510,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
