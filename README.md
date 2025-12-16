@@ -438,7 +438,17 @@ substantial temporal distribution shifts.
 
 ---
 
-### Step 2 — Pretraining
+### step 2 - Hyperparameters Research
+
+Search Hyperarmeters of Cooperative and Competitive Model
+
+    code/Search/co_random.py 
+
+    code/Search/bc_random.py
+
+---
+
+### Step 3 — Pretraining
 
 Pretrain cooperative and competitive feature interaction modules:
 
@@ -448,7 +458,7 @@ Pretraining stabilizes subsequent joint training of the full BaSFiN model.
 
 ---
 
-### Step 3 — Main Training (2013–2024)
+### Step 4 — Main Training (2013–2024)
 
     train_basfin_noInter.py
 
@@ -460,7 +470,7 @@ This controls whether pretrained modules are frozen during joint training.
 
 ---
 
-### Step 4 — Extended-Period Training (2009–2024)
+### Step 5 — Extended-Period Training (2009–2024)
 
 Switch to:
 
@@ -471,18 +481,6 @@ Then run:
     train_basfin_noInter.py
 
 The workflow is identical to the 2013–2024 version, with extended historical data.
-
----
-
-### Step 5 — Hyperparameter Search
-
-Hyperparameter tuning is conducted using scripts under:
-
-    code/Search/
-
-These experiments are performed on the 2013–2024 dataset.
-
----
 
 ## Notes
 
