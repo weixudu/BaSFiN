@@ -92,7 +92,7 @@ def train_and_evaluate(player_dim, intermediate_dim, dropout_rate, mlp_hidden_di
         need_att = need_att
     )
     model = model.to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.005)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, 
                                                     patience=2, min_lr=1e-6)
     criterion = nn.BCELoss()
@@ -316,4 +316,5 @@ def main():
     best_model.load_state_dict(combo_results[best_combo]['model_states'][best_trial_idx])
 
 if __name__ == "__main__":
+
     main()
