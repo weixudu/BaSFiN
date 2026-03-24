@@ -302,21 +302,37 @@ Table 8 summarizes the players with the lowest and highest posterior uncertainti
    -`code/BaSFiN/train_BaS.py`
 ---
 
+### Table 9 — Decomposition of Model Outputs for a Sample Game
 
-### Tables 9–10 — Interpretable Pairwise Interaction Scores (Case Studies)
+- Table 9 provides a detailed decomposition of the model's prediction outputs for an individual regular-season matchup (e.g., New York Knicks vs. Boston Celtics). This analysis highlights the contribution of each modular component to the final predicted outcome.
 
-Tables 9 and 10 present qualitative case studies illustrating the interpretability of
+Decomposition Components:
+
+(i) Individual Strength: The aggregated baseline skill of the players on the floor.
+
+(ii) Cooperative Interactions: The internal synergy and coordination effects within each team.
+
+(iii) Competitive Interactions: The tactical advantage or disadvantage when facing specific opponent lineups.
+
+- Script location:
+  
+  -`code/BaSFiN/train_BaSFiN_noInter.py`
+
+
+### Tables 10–11 — Interpretable Pairwise Interaction Scores (Case Studies)
+
+Table 10 and 11 present qualitative case studies illustrating the interpretability of
 the learned pairwise interaction scores produced by the BaSFiN framework.
 
-- **Table 9** focuses on *LeBron James*.  
+- Table 9 focuses on *LeBron James*.  
   - Implemented by setting `FOCUS_PID = 1` in both `train_bc.py` and `train_cofim.py`.
-- **Table 10** focuses on *Stephen Curry*.  
+- Table 10 focuses on *Stephen Curry*.  
   - Implemented by setting `FOCUS_PID = 355` in both `train_bc.py` and `train_cofim.py`.
 
 For each focal player, three types of interaction scores are reported:
-- **Offensive advantage** against specific defenders
-- **Defensive suppression** against opposing offensive players
-- **Team-level cooperation (synergy)** scores with teammates
+- Offensive advantage against specific defenders
+- Defensive suppression against opposing offensive players
+- Team-level cooperation (synergy) scores with teammates
 
 These scores are derived from the learned **competition** and **cooperation** modules
 and are intended for **interpretability analysis rather than predictive evaluation**.
@@ -374,9 +390,9 @@ model parameters.
 
 
 ---
-### Table 11 — Long-Term Robustness Across Rolling-Year Windows
+### Table 12 — Long-Term Robustness Across Rolling-Year Windows
 
-Table 11 evaluates the long-term robustness and temporal generalization ability of
+Table 12 evaluates the long-term robustness and temporal generalization ability of
 BaSFiN by comparing predictive AUC across multiple rolling-window year ranges.
 
 - Evaluated year windows:
@@ -411,9 +427,9 @@ substantial temporal distribution shifts.
   -`code/BaSFiN_2009_2024/train_basfin_nointer.py`
 ---
 
-### Table 8 — Hyperparameter Sensitivity Analysis for FiN Modules
+### Table 13 — Hyperparameter Sensitivity Analysis for FiN Modules
 
-Table 8 reports the top five hyperparameter configurations identified through a
+Table 13 reports the top five hyperparameter configurations identified through a
 randomized hyperparameter search for both the cooperation and competition FiN
 modules.
 
