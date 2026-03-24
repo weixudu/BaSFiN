@@ -300,6 +300,7 @@ Table 8 summarizes the players with the lowest and highest posterior uncertainti
 - Script location:
 
    -`code/BaSFiN/train_BaS.py`
+   -`code/BaSFiN/statistic/sigma_ana.py`
 ---
 
 ### Table 9 — Decomposition of Model Outputs for a Sample Game
